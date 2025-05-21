@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS membresias (
     fecha_inscripcion DATE NOT NULL,
     fecha_expiracion DATE,
     estado_membresia ENUM('Activa', 'Inactiva', 'Suspendida', 'En proceso') DEFAULT 'En proceso',
-    rol ENUM('Miembro', 'Coordinador', 'Secretario', 'Tesorero', 'Asesor') DEFAULT 'Miembro',
+    rol ENUM('Miembro', 'Coordinador') DEFAULT 'Miembro',
     FOREIGN KEY (id_estudiante) REFERENCES estudiantes(id_estudiante) ON DELETE CASCADE,
     FOREIGN KEY (id_club) REFERENCES clubes(id_club) ON DELETE CASCADE,
     UNIQUE KEY unique_membresia (id_estudiante, id_club)
