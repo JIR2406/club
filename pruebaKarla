@@ -1,1 +1,215 @@
-.
+import customtkinter as ctk
+from tkinter import messagebox
+from clubs.consultarClub import ConsultarClubScreen
+from clubs.crearClub import NuevoClubForm
+from clubs.editarClub import EditarClubForm
+from db import get_connection
+from miembros.consultarMiembro import ConsultarEstudiantesScreen
+from miembros.crearMiembro import RegistroEstudianteForm
+from miembros.editarMiembro import EditarMiembroScreen
+from miembros.eliminarMiembro import EliminarEstudiantesScreen
+
+
+class Menu(ctk.CTkFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        
+        self.parent = parent
+        self.menu_visible = True
+        
+        # Configuración del frame del menú
+        self.configure(width=250, corner_radius=0, fg_color=("#f0f0f0", "#2b2b2b"))
+        self.pack_propagate(False)
+        self.pack(side="left", fill="y", padx=(0, 5))
+        
+        # Logo o título de la aplicación
+        self.logo_frame = ctk.CTkFrame(self, fg_color="transparent", height=80)
+        self.logo_frame.pack(fill="x", padx=10, pady=(10, 20))
+        
+        self.logo_label = ctk.CTkLabel(
+            self.logo_frame, 
+            text="Club Manager", 
+            font=ctk.CTkFont(size=18, weight="bold"),
+            anchor="w"
+        )
+        self.logo_label.pack(fill="x", padx=10)
+        
+        # Separador
+        ctk.CTkLabel(self, text="", height=2, fg_color=("#e0e0e0", "#3a3a3a")).pack(fill="x", pady=5)
+        
+        # Botones del menú
+        menu_buttons = [
+            {"text": "🏠 Gestión de Clubs", "command": self.clubs},
+            {"text": "👥 Gestión de Miembros", "command": self.miembros},
+            {"text": "💳 Gestión de Membresías", "command": self.membresias_pagos},
+            {"text": "⚙️ Configuración", "command": self.configuracion_pantalla},
+            {"text":  "🔍 Gestión de Pagos", "command": self.pagos},
+            {"text": "❌ Cerrar Sesión", "command": self.cerrar_sesion}
+        ]
+        
+        self.buttons = []
+        for btn in menu_buttons:
+            button = ctk.CTkButton(
+                self,
+                text=btn["text"],
+                command=btn["command"],
+                width=220,
+                height=40,
+                corner_radius=8,
+                anchor="w",
+                font=ctk.CTkFont(size=14),
+                fg_color="transparent",
+                hover_color=("#e0e0e0", "#3a3a3a"),
+                text_color=("#333333", "#f0f0f0")
+            )
+            button.pack(pady=5, padx=10)
+            self.buttons.append(button)
+        
+        # Botón toggle del menú
+        self.btn_toggle = ctk.CTkButton(
+            self.parent, 
+            text="☰", 
+            command=self.toggle_menu, 
+            width=40, 
+            height=40,
+            corner_radius=20,
+            fg_color=("#f0f0f0", "#2b2b2b"),
+            hover_color=("#e0e0e0", "#3a3a3a"),
+            font=ctk.CTkFont(size=16)
+        )
+        self.btn_toggle.place(x=10, y=10)
+        
+        # Frame contenedor de las pantallas
+        self.screen_container = ctk.CTkFrame(self.parent, fg_color="transparent")
+        self.screen_container.pack(side="right", fill="both", expand=True, padx=(5, 10), pady=10)
+        
+        # Pantallas disponibles
+        self.screens = {
+            "clubs": self.create_clubs_screen(),
+            "miembros": self.create_config_screen(),
+            "membresias": self.create_membresias_screen(),
+            "configuracion": self.create_configuracion_screen(),
+            "pagos": self.create_pagos_screen()
+        }
+        
+        # Mostrar pantalla inicial
+        self.show_screen("inicio")
+        self.set_active_button(self.buttons[0])
+        
+        # Ajustar posición del toggle cuando cambia el tamaño de la ventana
+        self.parent.bind("<Configure>", self.ajustar_posicion_toggle)
+    
+
+#--------------------Metodo para crear las pantalla de gestión de clubs--------------------   
+    def create_clubs_screen(self):
+        """Crea y retorna la pantalla de gestión de clubs"""
+        frame = ctk.CTkFrame(self.screen_container, fg_color="transparent")
+
+        label = ctk.CTkLabel(
+            frame,
+            text="Gestión de Clubs",
+            font=ctk.CTkFont(size=24, weight="bold")
+        )
+        label.pack(pady=(20, 10))
+
+        # Fila de botones de opciones (Crear, Editar, Ver, Eliminar)
+        options_frame = ctk.CTkFrame(frame)
+        options_frame.pack(pady=(0, 10))
+
+        ctk.CTkButton(
+            options_frame,
+            text="Crear",
+            width=100,
+            command=self.agregar_club
+        ).pack(side="left", padx=5)
+
+        ctk.CTkButton(
+            options_frame,
+            text="Editar",
+            width=100,
+            command=self.opcion_editar_club  # Método que puedes definir para mostrar la edición general
+        ).pack(side="left", padx=5)
+
+        ctk.CTkButton(
+            options_frame,
+            text="Consultar",
+            width=100,
+            command=self.opcion_consultar_club  # Método para ver detalles generales o filtrados
+        ).pack(side="left", padx=5)
+
+        ctk.CTkButton(
+            options_frame,
+            text="Eliminar",
+            width=100,
+            fg_color="#d9534f",
+            hover_color="#c9302c",
+            command=self.opcion_eliminar_club  # Método que puedes definir para gestión masiva o individual
+        ).pack(side="left", padx=5)
+
+        # Contenido scrollable
+        self.club_list_frame = ctk.CTkScrollableFrame(frame, height=300)
+        self.club_list_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        return frame
+
+#--------------------Metodo para crear las pantalla de gestión de miembros--------------------   
+
+    def create_config_screen(self):
+        """Crea y retorna la pantalla de gestión de miembros con CRUD completo"""
+        frame = ctk.CTkFrame(self.screen_container, fg_color="transparent")
+        
+        # Título
+        label = ctk.CTkLabel(
+            frame, 
+            text="Gestión de Miembros", 
+            font=ctk.CTkFont(size=24, weight="bold")
+        )
+        label.pack(pady=(20, 10))
+
+        # Contenedor principal para centrar los botones
+        center_container = ctk.CTkFrame(frame, fg_color="transparent")
+        center_container.pack(pady=(0, 10))
+        
+        # Fila de botones CRUD (ahora dentro del contenedor centrado)
+        crud_frame = ctk.CTkFrame(center_container, fg_color="transparent")
+        crud_frame.pack()
+        
+        # Botones CRUD con empaquetado centrado
+        ctk.CTkButton(
+            crud_frame,
+            text="Agregar",
+            width=100,
+            command=self.agregar_miembro
+        ).pack(side="left", padx=5)
+
+        ctk.CTkButton(
+            crud_frame,
+            text="Editar",
+            width=100,
+            command=self.editar_miembro
+        ).pack(side="left", padx=5)
+
+        ctk.CTkButton(
+            crud_frame,
+            text="Consultar",
+            width=100,
+            command=self.consultar_miembro
+        ).pack(side="left", padx=5)
+
+        ctk.CTkButton(
+            crud_frame,
+            text="Eliminar",
+            width=100,
+            fg_color="#d9534f",
+            hover_color="#c9302c",
+            command=self.eliminar_miembro
+        ).pack(side="left", padx=5)
+
+        # Lista de miembros (Scrollable)
+        self.member_list_frame = ctk.CTkScrollableFrame(frame, height=300)
+        self.member_list_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        # Cargar miembros iniciales
+        self.cargar_miembros()
+        
+        return frame
