@@ -225,8 +225,7 @@ class UserManagementWindow:
 
             frame.grid_columnconfigure(0, weight=1)  
 
-            text = (f"{user['nombre_usuario']} - {user['correo']} "
-                    f"({user['rol']}) - {user['estado']}")
+            text = (f"{user['nombre_usuario']}")
 
             label = ctk.CTkLabel(
                 frame,
@@ -360,22 +359,24 @@ class UserManagementWindow:
         for user in filtered:
             frame = ctk.CTkFrame(self.list_scroll, height=45)
             frame.pack(fill="x", pady=2)
-            
-            text = (f"{user['nombre_usuario']} - {user['correo']} "
-                   f"({user['rol']}) - {user['estado']}")
-            
+
+            frame.grid_columnconfigure(0, weight=1)  
+            frame.grid_columnconfigure(1, minsize=80)  
+
+            text = f"{user['nombre_usuario']} "
+
             ctk.CTkLabel(
                 frame,
                 text=text,
                 anchor="w"
-            ).pack(side="left", padx=10, fill="x", expand=True)
-            
+            ).grid(row=0, column=0, sticky="ew", padx=10, pady=5)
+
             ctk.CTkButton(
                 frame,
                 text="Editar",
-                width=60,
+                width=70,
                 command=lambda u=user: self.load_user_data(u)
-            ).pack(side="right", padx=2)
+            ).grid(row=0, column=1, sticky="e", padx=10, pady=5)
         
         self.user_count_label.configure(text=f"Usuarios ({len(filtered)} encontrados)")
     
