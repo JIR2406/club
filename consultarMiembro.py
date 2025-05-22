@@ -59,4 +59,20 @@ class ConsultarEstudiantesScreen:
         
         # Cargar todos los estudiantes inicialmente
         self.mostrar_todos()
+        
+    def mostrar_todos(self):
+        """Muestra todos los estudiantes sin filtros"""
+        self.search_var.set("")
+        self.filtrar_estudiantes()
+        
+    def filtrar_estudiantes(self):
+        """Filtra los estudiantes según el texto ingresado"""
+        termino = self.search_var.get().strip().lower()
+        
+        # Limpiar lista actual
+        for widget in self.list_container.winfo_children():
+            widget.destroy()
+        
+        # Obtener estudiantes de la base de datos
+        estudiantes = self.obtener_estudiantes_db(termino)
 
