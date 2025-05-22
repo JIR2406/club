@@ -213,3 +213,257 @@ class Menu(ctk.CTkFrame):
         self.cargar_miembros()
         
         return frame
+    
+    #----
+
+     def create_membresias_screen(self):
+        """Crea la pantalla de gestión de membresías con botones de acciones"""
+        frame = ctk.CTkFrame(self.screen_container, fg_color="transparent")
+        
+        # Título
+        ctk.CTkLabel(
+            frame, 
+            text="Gestión de Membresías", 
+            font=ctk.CTkFont(size=24, weight="bold")
+        ).pack(pady=20)
+
+        # Contenedor principal de botones
+        button_container = ctk.CTkFrame(frame, fg_color="transparent")
+        button_container.pack(pady=20)
+
+        # Primera fila de botones (Acciones básicas)
+        row1_frame = ctk.CTkFrame(button_container, fg_color="transparent")
+        row1_frame.pack(pady=5)
+
+        ctk.CTkButton(
+            row1_frame,
+            text="➕ Registrar Nueva Membresía",
+            width=200,
+            height=40,
+            command=self.registrar_membresia,
+            fg_color="#28a745",
+            hover_color="#218838"
+        ).pack(side="left", padx=10)
+
+        ctk.CTkButton(
+            row1_frame,
+            text="✏️ Editar Membresía",
+            width=200,
+            height=40,
+            command=self.editar_membresia,
+            fg_color="#17a2b8",
+            hover_color="#138496"
+        ).pack(side="left", padx=10)
+
+        # Segunda fila de botones (Gestión de estados)
+        row2_frame = ctk.CTkFrame(button_container, fg_color="transparent")
+        row2_frame.pack(pady=5)
+
+        ctk.CTkButton(
+            row2_frame,
+            text="✅ Activar Membresía",
+            width=200,
+            height=40,
+            command=self.activar_membresia,
+            fg_color="#5cb85c",
+            hover_color="#4cae4c"
+        ).pack(side="left", padx=10)
+
+        ctk.CTkButton(
+            row2_frame,
+            text="⏸️ Suspender Membresía",
+            width=200,
+            height=40,
+            command=self.suspender_membresia,
+            fg_color="#ffc107",
+            hover_color="#e0a800",
+            text_color="#000"
+        ).pack(side="left", padx=10)
+
+        # Tercera fila de botones (Roles y eliminación)
+        row3_frame = ctk.CTkFrame(button_container, fg_color="transparent")
+        row3_frame.pack(pady=5)
+
+        ctk.CTkButton(
+            row3_frame,
+            text="👔 Asignar Rol",
+            width=200,
+            height=40,
+            command=self.asignar_rol,
+            fg_color="#6f42c1",
+            hover_color="#5a3d8e"
+        ).pack(side="left", padx=10)
+
+        ctk.CTkButton(
+            row3_frame,
+            text="🗑️ Eliminar Membresía",
+            width=200,
+            height=40,
+            command=self.eliminar_membresia,
+            fg_color="#dc3545",
+            hover_color="#c82333"
+        ).pack(side="left", padx=10)
+
+        # Cuarta fila de botones (Operaciones adicionales)
+        row4_frame = ctk.CTkFrame(button_container, fg_color="transparent")
+        row4_frame.pack(pady=5)
+
+        ctk.CTkButton(
+            row4_frame,
+            text="🔄 Renovar Membresía",
+            width=200,
+            height=40,
+            command=self.renovar_membresia,
+            fg_color="#20c997",
+            hover_color="#17a589"
+        ).pack(side="left", padx=10)
+
+        ctk.CTkButton(
+            row4_frame,
+            text="📊 Generar Reporte",
+            width=200,
+            height=40,
+            command=self.generar_reporte,
+            fg_color="#6c757d",
+            hover_color="#5a6268"
+        ).pack(side="left", padx=10)
+
+        return frame
+    
+    def create_configuracion_screen(self):
+        """Crea y retorna la pantalla de configuración"""
+        frame = ctk.CTkFrame(self.screen_container, fg_color="transparent")
+        
+        label = ctk.CTkLabel(
+            frame, 
+            text="Configuración del Sistema", 
+            font=ctk.CTkFont(size=24, weight="bold")
+        )
+        label.pack(pady=20)
+        
+        # Configuración de tema
+        theme_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        theme_frame.pack(fill="x", padx=20, pady=10)
+        
+        ctk.CTkLabel(
+            theme_frame,
+            text="Tema de la aplicación:",
+            font=ctk.CTkFont(size=14)
+        ).pack(side="left")
+        
+        self.theme_option = ctk.CTkOptionMenu(
+            theme_frame,
+            values=["Claro", "Oscuro", "Sistema"],
+            command=self.change_theme
+        )
+        self.theme_option.pack(side="right")
+        
+        # Configuración de usuario
+        user_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        user_frame.pack(fill="x", padx=20, pady=10)
+        
+        ctk.CTkLabel(
+            user_frame,
+            text="Configuración de usuario:",
+            font=ctk.CTkFont(size=14)
+        ).pack(side="left")
+        
+        ctk.CTkButton(
+            user_frame,
+            text="Cambiar Contraseña",
+            width=150,
+            command=self.cambiar_contrasena
+        ).pack(side="right")
+        
+        # Separador
+        ctk.CTkLabel(frame, text="", height=2, fg_color=("#e0e0e0", "#3a3a3a")).pack(fill="x", pady=20)
+        
+        # Información del sistema
+        info_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        info_frame.pack(fill="x", padx=20, pady=10)
+        
+        ctk.CTkLabel(
+            info_frame,
+            text="Club Manager v1.0.0",
+            font=ctk.CTkFont(size=12),
+            text_color=("#666", "#aaa")
+        ).pack(side="left")
+        
+        ctk.CTkLabel(
+            info_frame,
+            text="© 2023 Todos los derechos reservados",
+            font=ctk.CTkFont(size=12),
+            text_color=("#666", "#aaa")
+        ).pack(side="right")
+        
+        return frame
+    
+    def create_pagos_screen(self):
+        """Crea y retorna la pantalla de configuración"""
+        frame = ctk.CTkFrame(self.screen_container, fg_color="transparent")
+        label = ctk.CTkLabel(
+            frame, 
+            text="Gestión de Pagos", 
+            font=ctk.CTkFont(size=24, weight="bold")
+        )
+        label.pack(pady=20)
+        # Contenido de ejemplo para la pantalla de pagos
+        stats_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        stats_frame.pack(fill="x", padx=10, pady=10)
+        # Estadísticas rápidas
+        stats = [
+            {"title": "Total Pagos", "value": "124", "color": "#5bc0de"},
+            {"title": "Pagos Pendientes", "value": "98", "color": "#5cb85c"},
+            {"title": "Pagos Completados", "value": "26", "color": "#d9534f"}
+        ]
+        for stat in stats:
+            stat_card = ctk.CTkFrame(
+                stats_frame,
+                width=120,
+                height=80,
+                border_width=1,
+                border_color=("#ddd", "#444"),
+                fg_color=("#fff", "#333")
+            )
+            stat_card.pack_propagate(False)
+            stat_card.pack(side="left", padx=10)
+            
+            ctk.CTkLabel(
+                stat_card,
+                text=stat["title"],
+                font=ctk.CTkFont(size=12),
+                text_color=("#666", "#aaa")
+            ).pack(pady=(10, 0))
+            
+            ctk.CTkLabel(
+                stat_card,
+                text=stat["value"],
+                font=ctk.CTkFont(size=24, weight="bold"),
+                text_color=stat["color"]
+            ).pack()
+        # Lista de pagos
+        self.payment_list_frame = ctk.CTkScrollableFrame(frame, height=200)
+        self.payment_list_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        # Ejemplo de datos
+        pagos = [
+            {"nombre": "Juan Pérez", "monto": "$50", "estado": "Pendiente"},
+            {"nombre": "María García", "monto": "$30", "estado": "Completado"},
+            {"nombre": "Carlos López", "monto": "$20", "estado": "Pendiente"}
+        ]
+        for pago in pagos:
+            pago_frame = ctk.CTkFrame(self.payment_list_frame)
+            pago_frame.pack(fill="x", pady=5, padx=5)
+            
+            ctk.CTkLabel(
+                pago_frame, 
+                text=f"{pago['nombre']} - {pago['monto']}",
+                font=ctk.CTkFont(size=14)
+            ).pack(side="left", padx=10)
+            
+            ctk.CTkLabel(
+                pago_frame,
+                text=f"Estado: {pago['estado']}",
+                font=ctk.CTkFont(size=12),
+                text_color=("#d9534f" if pago['estado'] == "Pendiente" else "#5cb85c")
+            ).pack(side="right", padx=10)
+        return frame
