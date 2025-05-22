@@ -456,49 +456,67 @@ class UserManagementWindow:
     def delete_user(self):
         """Elimina el usuario actual"""
         if not self.current_user:
+            messagebox.showwarning("Advertencia", "No hay usuario seleccionado para eliminar")
             return
-            
-        confirmacion = messagebox.askyesno(
-            "Confirmar Eliminación",
-            f"¿Estás seguro de eliminar este usuario?\n\n"
-            f"Usuario: {self.current_user['nombre_usuario']}\n"
-            f"Correo: {self.current_user['correo']}\n"
-            f"Rol: {self.current_user['rol']}",
-            icon="warning"
-        )
         
-        if not confirmacion:
+        if not isinstance(self.current_user, dict):
+            messagebox.showerror("Error", "Datos de usuario no válidos")
             return
-            
-        conn = None
+        
         try:
-            # Verificar si el usuario a eliminar es el mismo que está logueado
-            if hasattr(self.app, 'current_user') and self.app.current_user and self.app.current_user['id_usuario'] == self.current_user['id_usuario']:
-                raise Exception("No puedes eliminar tu propio usuario mientras estás logueado")
+            user_id = self.current_user.get('id_usuario')
+            username = self.current_user.get('nombre_usuario', 'N/A')
+            email = self.current_user.get('correo', 'N/A')
+            role = self.current_user.get('rol', 'N/A')
             
-            conn = get_connection()
-            cursor = conn.cursor()
-            
-            cursor.execute(
-                "DELETE FROM usuarios WHERE id_usuario = %s",
-                (self.current_user['id_usuario'],)
+            if not user_id:
+                raise ValueError("ID de usuario no válido")
+                
+            confirmacion = messagebox.askyesno(
+                "Confirmar Eliminación",
+                f"¿Estás seguro de eliminar este usuario?\n\n"
+                f"Usuario: {username}\n"
+                f"Correo: {email}\n"
+                f"Rol: {role}",
+                icon="warning"
             )
-            conn.commit()
             
-            if cursor.rowcount > 0:
-                messagebox.showinfo("Éxito", "Usuario eliminado correctamente")
-                self.update_users_list()
-                self.clear_form()
-            else:
-                messagebox.showerror("Error", "No se pudo eliminar el usuario")
+            if not confirmacion:
+                return
+                
+            conn = None
+            try:
+                if (hasattr(self.app, 'current_user') and 
+                    isinstance(self.app.current_user, dict) and 
+                    self.app.current_user.get('id_usuario') == user_id):
+                    raise Exception("No puedes eliminar tu propio usuario mientras estás logueado")
+                
+                conn = get_connection()
+                cursor = conn.cursor()
+                
+                cursor.execute(
+                    "DELETE FROM usuarios WHERE id_usuario = %s",
+                    (user_id,)
+                )
+                conn.commit()
+                
+                if cursor.rowcount > 0:
+                    messagebox.showinfo("Éxito", "Usuario eliminado correctamente")
+                    self.update_users_list()
+                    self.clear_form()
+                else:
+                    messagebox.showerror("Error", "No se pudo eliminar el usuario")
+                    
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al eliminar usuario:\n{str(e)}")
+                if conn:
+                    conn.rollback()
+            finally:
+                if conn:
+                    conn.close()
                 
         except Exception as e:
-            messagebox.showerror("Error", f"Error al eliminar usuario:\n{str(e)}")
-            if conn:
-                conn.rollback()
-        finally:
-            if conn:
-                conn.close()
+            messagebox.showerror("Error", f"Error al procesar datos del usuario:\n{str(e)}")
     
     def cancel_edit(self):
         """Cancela la edición actual"""
