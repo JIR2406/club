@@ -422,4 +422,43 @@ class PaymentManagementWindow:
         finally:
             if conn:
                 conn.close()
-    
+        def delete_payment(self):
+             """Elimina el pago actual"""
+        if not self.current_payment:
+            return
+            
+        confirm = messagebox.askyesno(
+            "Confirmar Eliminación",
+            f"¿Estás seguro de eliminar este pago?\n\n"
+            f"Membresía: #{self.current_payment['id_membresia']}\n"
+            f"Monto: ${self.current_payment['monto']:.2f}\n"
+            f"Fecha: {self.current_payment['fecha_pago']}",
+            icon="warning"
+        )
+        
+        if confirm:
+            try:
+                conn = get_connection()
+                cursor = conn.cursor()
+                
+                cursor.execute(
+                    "DELETE FROM pagos WHERE id_pago = %s",
+                    (self.current_payment["id_pago"],)
+                )
+                conn.commit()
+                
+                if cursor.rowcount > 0:
+                    messagebox.showinfo("Éxito", "Pago eliminado correctamente")
+                    self.update_payments_list()
+                    self.clear_form()
+                else:
+                    messagebox.showerror("Error", "No se pudo eliminar el pago")
+                    
+            except Exception as e:
+                messagebox.showerror("Error", f"Error al eliminar pago: {str(e)}")
+                if conn:
+                    conn.rollback()
+            finally:
+                if conn:
+                    conn.close()
+  
