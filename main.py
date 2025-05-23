@@ -1,4 +1,4 @@
-    from tkinter import messagebox
+from tkinter import messagebox
 import customtkinter as ctk
 from clubs import ClubManagementWindow
 from cursos import CourseManagementWindow
