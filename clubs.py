@@ -375,8 +375,80 @@ class ClubManagementWindow:
             finally:
                 if conn:
                     conn.close()
+                    
+    def cancel_edit(self):
+        """Cancela la edición actual"""
+        self.clear_form()
     
+    def get_clubs_from_db(self):
+        """Obtiene todos los clubs de la base de datos"""
+        conn = None
+        try:
+            conn = get_connection()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("""
+                SELECT id_club, codigo_club, nombre_club, responsable, 
+                       correo_contacto, estado, fecha_creacion, 
+                       max_miembros, requisitos, descripcion 
+                FROM clubes
+                ORDER BY nombre_club
+            """)
+            return cursor.fetchall()
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al cargar clubs: {str(e)}")
+            return []
+        finally:
+            if conn:
+                conn.close()
     
-    
+    def search_clubs(self):
+        """Busca clubs según el criterio"""
+        search_term = self.search_entry.get().lower()
+        if not search_term:
+            self.update_clubs_list()
+            return
         
-
+        # Obtener datos actualizados
+        all_clubs = self.get_clubs_from_db()
+        
+        filtered = [
+            club for club in all_clubs
+            if (search_term in club.get("nombre_club", "").lower() or
+                search_term in club.get("codigo_club", "").lower() or
+                search_term in (club.get("responsable", "") or "").lower() or
+                search_term in (club.get("correo_contacto", "") or "").lower())
+        ]
+        
+        # Actualizar lista visual
+        for widget in self.list_scroll.winfo_children():
+            widget.destroy()
+        
+        for club in filtered:
+            frame = ctk.CTkFrame(self.list_scroll, height=45)
+            frame.pack(fill="x", pady=2)
+            
+            text = f"{club.get('codigo_club', '')} - {club.get('nombre_club', '')}"
+            ctk.CTkLabel(
+                frame,
+                text=text,
+                anchor="w"
+            ).pack(side="left", padx=10, fill="x", expand=True)
+            
+            ctk.CTkButton(
+                frame,
+                text="Editar",
+                width=60,
+                command=lambda c=club: self.load_club_data(c)
+            ).pack(side="right", padx=2)
+        
+        self.club_count_label.configure(text=f"Clubs ({len(filtered)} encontrados)")
+    
+    def clear_search(self):
+        """Limpia la búsqueda y muestra todos los clubs"""
+        self.search_entry.delete(0, "end")
+        self.update_clubs_list()
+    
+    def new_club(self):
+        """Prepara el formulario para un nuevo club"""
+        self.clear_form()
+    
