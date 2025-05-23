@@ -461,4 +461,53 @@ class PaymentManagementWindow:
             finally:
                 if conn:
                     conn.close()
-  
+        def search_payments(self):
+            """Busca pagos según el criterio"""
+        search_term = self.search_entry.get().lower()
+        if not search_term:
+            self.update_payments_list()
+            return
+        
+        all_payments = self.get_payments_from_db()
+        
+        filtered = [
+            p for p in all_payments
+            if (search_term in str(p.get("id_membresia", "")).lower() or
+                search_term in (p.get("referencia_pago", "") or "").lower() or
+                search_term in p.get("estado_pago", "").lower() or
+                search_term in p.get("metodo_pago", "").lower())
+        ]
+        
+        for widget in self.list_scroll.winfo_children():
+            widget.destroy()
+        
+        for payment in filtered:
+            frame = ctk.CTkFrame(self.list_scroll, height=45)
+            frame.pack(fill="x", pady=2, padx=2)
+            
+            frame.grid_columnconfigure(0, weight=3)
+            frame.grid_columnconfigure(1, weight=1)
+            
+            text = (f"Membresía #{payment['id_membresia']} - ${payment['monto']:.2f} "
+                   f"({payment['metodo_pago']}) - {payment['estado_pago']}")
+            
+            label = ctk.CTkLabel(
+                frame,
+                text=text,
+                anchor="w",
+                wraplength=300
+            )
+            label.grid(row=0, column=0, sticky="ew", padx=(5, 0))
+            
+            edit_btn = ctk.CTkButton(
+                frame,
+                text="Editar",
+                width=70,
+                command=lambda p=payment: self.load_payment_data(p),
+                fg_color="#0d6efd",
+                hover_color="#0b5ed7"
+            )
+            edit_btn.grid(row=0, column=1, sticky="e", padx=(0, 5))
+        
+        self.payment_count_label.configure(text=f"Pagos ({len(filtered)} encontrados)")
+    
