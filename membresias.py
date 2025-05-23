@@ -401,7 +401,67 @@ class MembershipManagementWindow:
                 if conn:
                     conn.close()
     
+    def search_memberships(self):
+        """Busca membresías según el criterio"""
+        search_term = self.search_entry.get().lower()
+        if not search_term:
+            self.update_memberships_list()
+            return
+        
+        all_memberships = self.get_memberships_from_db()
+        
+        filtered = [
+            m for m in all_memberships
+            if (search_term in str(m.get("id_estudiante", "")).lower() or
+               search_term in str(m.get("id_club", "")).lower() or
+               search_term in m.get("estado_membresia", "").lower() or
+               search_term in m.get("rol", "").lower()
+            )
+        ]
+        
+        for widget in self.list_scroll.winfo_children():
+            widget.destroy()
+        
+        for membership in filtered:
+            frame = ctk.CTkFrame(self.list_scroll, height=45)
+            frame.pack(fill="x", pady=2)
+            
+            text = (f"Est. ID:{membership['id_estudiante']} en Club ID:{membership['id_club']} - "
+                   f"{membership['estado_membresia']} ({membership['rol']})")
+            
+            ctk.CTkLabel(
+                frame,
+                text=text,
+                anchor="w"
+            ).pack(side="left", padx=10, fill="x", expand=True)
+            
+            ctk.CTkButton(
+                frame,
+                text="Editar",
+                width=60,
+                command=lambda m=membership: self.load_membership_data(m)
+            ).pack(side="right", padx=2)
+        
+        self.membership_count_label.configure(text=f"Membresías ({len(filtered)} encontradas)")
+    
+    def clear_search(self):
+        """Limpia la búsqueda"""
+        self.search_entry.delete(0, "end")
+        self.update_memberships_list()
+    
+    def new_membership(self):
+        """Prepara el formulario para nueva membresía"""
+        self.clear_form()
+    
+    def cancel_edit(self):
+        """Cancela la edición actual"""
+        self.clear_form()
 
+    # ======================
+    # MÉTODOS DE BASE DE DATOS
+    # ======================
+
+    def get_memberships_from_db(self):
         """Obtiene todas las membresías de la base de datos"""
         conn = None
         try:
