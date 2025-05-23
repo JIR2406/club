@@ -510,4 +510,15 @@ class PaymentManagementWindow:
             edit_btn.grid(row=0, column=1, sticky="e", padx=(0, 5))
         
         self.payment_count_label.configure(text=f"Pagos ({len(filtered)} encontrados)")
+    def clear_search(self):
+        """Limpia la búsqueda"""
+        self.search_entry.delete(0, "end")
+        self.update_payments_list()
     
+    def new_payment(self):
+        """Prepara el formulario para nuevo pago"""
+        self.clear_form()
+    
+    def cancel_edit(self):
+        """Cancela la edición actual"""
+        self.clear_form()
