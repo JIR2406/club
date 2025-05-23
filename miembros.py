@@ -158,18 +158,30 @@ class MemberManagementWindow:
                 self.list_scroll, text="No se encontraron estudiantes", text_color="gray"
             ).pack(pady=20)
             return
-        
+
         for member in self.members_data:
-            frame = ctk.CTkFrame(self.list_scroll, height=45)
-            frame.pack(fill="x", pady=2)
-            
-            text = f"{member.get('codigo_estudiante', '')} - {member.get('nombre', '')} {member.get('appat', '')} {member.get('apmat', '')}"
-            ctk.CTkLabel(frame, text=text, anchor="w").pack(side="left", padx=10, fill="x", expand=True)
-            
-            ctk.CTkButton(
+            frame = ctk.CTkFrame(self.list_scroll)
+            frame.pack(fill="x", pady=5, padx=5)
+
+            frame.grid_columnconfigure(0, weight=1)
+
+            nombre = member.get("nombre", "")
+            appat = member.get("appat", "")
+            apmat = member.get("apmat", "")
+            matricula = member.get("codigo_estudiante", "")
+
+            text = f"{nombre} {appat} {apmat} ({matricula})"
+
+            label = ctk.CTkLabel(frame, text=text, anchor="w")
+            label.grid(row=0, column=0, sticky="w", padx=(10, 5))
+
+            button = ctk.CTkButton(
                 frame, text="Editar", width=60,
                 command=lambda m=member: self.load_member_data(m)
-            ).pack(side="right", padx=2)
+            )
+            button.grid(row=0, column=1, padx=(5, 10))
+
+
     
     def load_member_data(self, member):
         self.current_member = member
