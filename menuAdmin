@@ -117,3 +117,39 @@ class Menu:
             self.app._clear_window()
         self.app.show_membresias_management()
         self.app.root.update_idletasks()
+
+        # Método para abrir la ventana de gestión de pagos
+    def open_pagos_window(self):
+        """Abre la ventana de pagos"""
+        if hasattr(self.app, 'pagos'):
+            self.app._clear_window()
+        self.app.show_pagos_management()
+        self.app.root.update_idletasks()
+
+# Método para abrir la ventana de gestión de cursos
+    def open_cursos_window(self):
+        """Abre la ventana de gestión de cursos"""
+        if hasattr(self.app, 'cursos'):
+            self.app._clear_window()
+        self.app.show_cursos_management()
+        self.app.root.update_idletasks()
+
+    def open_historial_window(self):
+        """Abre la ventana de historial académico"""
+        if hasattr(self.app, 'historial'):
+            self.app._clear_window()
+        self.app.show_historial_academico()
+        self.app.root.update_idletasks()
+    
+    def show_menu(self):
+        """Muestra nuevamente el menú principal"""
+        self.main_frame.pack(fill="both", expand=True, padx=20, pady=20)
+    
+    def logout(self):
+        """Cierra la sesión actual"""
+        if messagebox.askyesno(
+            "Cerrar Sesión", 
+            f"¿Estás seguro de cerrar sesión, {self.usuario}?"
+        ):
+            self.main_frame.pack_forget()
+            self.app.show_login()
