@@ -355,4 +355,71 @@ class PaymentManagementWindow:
             messagebox.showerror("Errores en el formulario", "\n".join(errors))
             return False
         return True
+    def save_payment(self):
+        """Guarda los datos del pago"""
+        errors = self.validate_form()
+        if errors:
+            messagebox.showerror("Errores en el formulario", "\n".join(errors))
+            return
+        
+        payment_data = self.get_form_data()
+        
+        conn = None
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            
+            if self.current_payment:
+                # Actualizar pago existente
+                payment_data["id_pago"] = self.current_payment["id_pago"]
+                cursor.execute("""
+                    UPDATE pagos SET
+                    id_membresia=%s, fecha_pago=%s, monto=%s,
+                    metodo_pago=%s, referencia_pago=%s, periodo_cubierto=%s,
+                    estado_pago=%s, notas=%s
+                    WHERE id_pago=%s
+                """, (
+                    payment_data["id_membresia"],
+                    payment_data["fecha_pago"],
+                    payment_data["monto"],
+                    payment_data["metodo_pago"],
+                    payment_data["referencia_pago"],
+                    payment_data["periodo_cubierto"],
+                    payment_data["estado_pago"],
+                    payment_data["notas"],
+                    payment_data["id_pago"]
+                ))
+                action = "actualizado"
+            else:
+                # Crear nuevo pago
+                cursor.execute("""
+                    INSERT INTO pagos (
+                        id_membresia, fecha_pago, monto,
+                        metodo_pago, referencia_pago, periodo_cubierto,
+                        estado_pago, notas
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    payment_data["id_membresia"],
+                    payment_data["fecha_pago"],
+                    payment_data["monto"],
+                    payment_data["metodo_pago"],
+                    payment_data["referencia_pago"],
+                    payment_data["periodo_cubierto"],
+                    payment_data["estado_pago"],
+                    payment_data["notas"]
+                ))
+                action = "registrado"
+            
+            conn.commit()
+            messagebox.showinfo("Éxito", f"Pago {action} correctamente")
+            self.update_payments_list()
+            self.clear_form()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al guardar el pago: {str(e)}")
+            if conn:
+                conn.rollback()
+        finally:
+            if conn:
+                conn.close()
     
