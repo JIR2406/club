@@ -522,3 +522,28 @@ class PaymentManagementWindow:
     def cancel_edit(self):
         """Cancela la edición actual"""
         self.clear_form()
+
+     # ======================
+    # MÉTODOS DE BASE DE DATOS
+    # ======================
+
+    def get_payments_from_db(self):
+        """Obtiene todos los pagos de la base de datos"""
+        conn = None
+        try:
+            conn = get_connection()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("""
+                SELECT p.id_pago, p.id_membresia, p.fecha_pago, p.monto,
+                       p.metodo_pago, p.referencia_pago, p.periodo_cubierto,
+                       p.estado_pago, p.notas
+                FROM pagos p
+                ORDER BY p.fecha_pago DESC
+            """)
+            return cursor.fetchall()
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al cargar pagos: {str(e)}")
+            return []
+        finally:
+            if conn:
+                conn.close()
